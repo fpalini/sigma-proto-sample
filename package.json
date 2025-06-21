@@ -5,6 +5,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "compile-proto": "mkdir -p src/generated/ && protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=esModuleInterop=true,forceLong=string,outputClientImpl=grpc-web --proto_path=./proto ./proto/*.proto && python3 -m grpc_tools.protoc -I proto/ --python_out=python/ --grpc_python_out=python/ relationship.proto",
     "preview": "vite preview"
   },
   "browserslist": {
@@ -29,7 +30,12 @@
     "react": "^19.0.0",
     "react-animate-height": "^3.2.3",
     "react-dom": "^19.0.0",
-    "react-icons": "^5.4.0"
+    "react-icons": "^5.4.0",
+    "grpc-web": "1.5.0",
+    "rxjs": "^7.8.2",
+    "@types/long": "^5.0.0",
+    "@improbable-eng/grpc-web": "0.15.0",
+    "browser-headers": "0.4.1"
   },
   "peerDependencies": {
     "sigma": ">=3.0.0-beta.33"
@@ -43,6 +49,10 @@
     "typescript": "^5.7.3",
     "vite": "^6.0.7",
     "vite-plugin-checker": "^0.8.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "ts-proto": "^2.7.5",
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.7.15",
+    "rxjs": "^7.8.2"
   }
 }

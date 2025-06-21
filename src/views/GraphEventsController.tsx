@@ -1,5 +1,7 @@
 import { useRegisterEvents, useSigma } from "@react-sigma/core";
 import { FC, PropsWithChildren, useEffect } from "react";
+import { Relationship } from "./generated/relationship";
+import { getRelationships } from "./ProtoClient";
 
 function getMouseLayer() {
   return document.querySelector(".sigma-mouse");
@@ -21,7 +23,7 @@ const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: strin
     registerEvents({
       clickNode({ node }) {
         if (!graph.getNodeAttribute(node, "hidden")) {
-          window.open(graph.getNodeAttribute(node, "URL"), "_blank");
+          // window.open(graph.getNodeAttribute(node, "URL"), "_blank");
         }
       },
       enterNode({ node }) {
@@ -36,6 +38,27 @@ const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: strin
         const mouseLayer = getMouseLayer();
         if (mouseLayer) mouseLayer.classList.remove("mouse-pointer");
       },
+      doubleClickNode({ event, node }) {
+        event.preventSigmaDefault();
+        
+        if (!graph.getNodeAttribute(node, "hidden")) {
+          getRelationships(node)
+            .subscribe({
+              next: (relationship: Relationship) => {
+                console.log("Relazione ricevuta:", relationship);
+                // addRelationToGraph(relationship, graph)
+              },
+              error: (err: Error) => {
+                console.error("Errore nello stream gRPC-Web:", err);
+                console.log(`Error: ${err.message || "Unknown error"}`);
+              },
+              complete: () => {
+                console.log("Stream gRPC-Web completato.");
+                console.log("Stream completed.");
+              },
+            })
+        }
+      }
     });
   }, []);
 

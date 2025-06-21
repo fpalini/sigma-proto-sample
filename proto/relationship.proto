@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package sigma_proto_sample;
+
+message Relationship {
+  Node node_from = 2;
+  Node node_to = 3;
+}
+
+message Node {
+  string key = 1;
+  string label = 2;
+  string tag = 3;
+  string url = 4;
+  string cluster = 5;
+  double x = 6;
+  double y = 7;
+  double score = 8;
+}
+
+message RelationshipRequest {
+  string node_id = 1;
+}
+
+service RelationshipService {
+  rpc GetRelationships(RelationshipRequest) returns (stream Relationship);
+}
