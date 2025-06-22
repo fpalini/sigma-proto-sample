@@ -1,7 +1,7 @@
 import { useRegisterEvents, useSigma } from "@react-sigma/core";
 import { FC, PropsWithChildren, useEffect } from "react";
-import { Relationship } from "./generated/relationship";
-import { getRelationships } from "./ProtoClient";
+import { Relationship } from "../generated/relationship";
+import { getRelationships } from "../ProtoClient";
 
 function getMouseLayer() {
   return document.querySelector(".sigma-mouse");
@@ -46,7 +46,28 @@ const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: strin
             .subscribe({
               next: (relationship: Relationship) => {
                 console.log("Relazione ricevuta:", relationship);
-                // addRelationToGraph(relationship, graph)
+
+                let node = relationship.nodeFrom
+                
+                if (!graph.hasNode(node?.key))
+                  graph.addNode(node?.key, {
+                    ...node,
+                    // ...omit(clusters[node?.cluster], "key"),
+                    // image: `./images/${tags[node?.tag].image}`,
+                  })
+                  
+                
+                node = relationship.nodeTo
+
+                if (!graph.hasNode(node?.key))
+                  graph.addNode(node?.key, {
+                    ...node,
+                    // ...omit(clusters[node?.cluster], "key"),
+                    // image: `./images/${tags[node?.tag].image}`,
+                  })
+
+                graph.addEdge(relationship.nodeFrom?.key, relationship.nodeTo?.key, { size: 1 });
+                
               },
               error: (err: Error) => {
                 console.error("Errore nello stream gRPC-Web:", err);

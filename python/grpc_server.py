@@ -7,11 +7,25 @@ from relationship_pb2_grpc import RelationshipServiceServicer, add_RelationshipS
 from relationship_pb2 import RelationshipRequest, Relationship, Node
 
 
+def find_node(key: str):
+    return [n for n in nodes if n["key"] == key][0]
+
+def build_node(node_data):
+    return Node(
+        key=node_data["key"],
+        label=node_data["label"],
+        url=node_data["URL"],
+        cluster=node_data["cluster"],
+        x=node_data["x"],
+        y=node_data["y"],
+        score=node_data["score"]
+    )
+
 # Importa i moduli generati
 
 # Classe che implementa il servizio RelationshipService
 class RelationshipServiceImpl(RelationshipServiceServicer):
-
+    
     def GetRelationships(self, request: RelationshipRequest, context):
         print("request!!")
         print(request)
@@ -22,32 +36,13 @@ class RelationshipServiceImpl(RelationshipServiceServicer):
         node_id = request.node_id
         print(f"Ricevuta richiesta GetRelationships per nodeId: {node_id}")
 
-        node = [n for n in nodes if n["key"] == node_id][0]
+        node = find_node(node_id)
+        node_proto = build_node(node)
 
-        node_proto = Node(
-                    key=node["key"],
-                    label=node["label"],
-                    url=node["URL"],
-                    cluster=node["cluster"],
-                    x=node["x"],
-                    y=node["y"],
-                    score=node["score"]
-                )
-
-        # Simula il recupero di dati da un database o da un'altra sorgente
-        # e li restituisce in streaming.
         relationships_source = [
             Relationship(
                 node_from=node_proto,
-                node_to=Node(
-                    key=nodes[e[0]]["key"],
-                    label=nodes[e[0]]["label"],
-                    url=nodes[e[0]]["URL"],
-                    cluster=nodes[e[0]]["cluster"],
-                    x=nodes[e[0]]["x"],
-                    y=nodes[e[0]]["y"],
-                    score=nodes[e[0]]["score"]
-                )
+                node_to=build_node(find_node(e[1]))
             )
             for e in edges
             if e[0] == node_id
@@ -55,15 +50,7 @@ class RelationshipServiceImpl(RelationshipServiceServicer):
 
         relationships_dest = [
             Relationship(
-                node_from=Node(
-                    key=nodes[e[0]]["key"],
-                    label=nodes[e[0]]["label"],
-                    url=nodes[e[0]]["URL"],
-                    cluster=nodes[e[0]]["cluster"],
-                    x=nodes[e[0]]["x"],
-                    y=nodes[e[0]]["y"],
-                    score=nodes[e[0]]["score"]
-                ),
+                node_from=build_node(find_node(e[0])),
                 node_to=node_proto
             )
             for e in edges
@@ -71,9 +58,8 @@ class RelationshipServiceImpl(RelationshipServiceServicer):
         ]
 
         for rel in relationships_source + relationships_dest:
-            print(f"Invio relazione: {rel.label} da {rel.node_from} a {rel.node_to}")
-            yield rel # Usa 'yield' per inviare ogni messaggio singolarmente in streaming
-            time.sleep(0.5) # Simula un ritardo di rete/elaborazione
+            print(f"Invio relazione")
+            yield rel  # Usa 'yield' per inviare ogni messaggio singolarmente in streaming
 
         print(f"Streaming di relazioni completato per nodeId: {node_id}")
 
@@ -83,7 +69,7 @@ def serve():
 
     # Aggiungi l'implementazione del tuo servizio al server
     add_RelationshipServiceServicer_to_server(
-        RelationshipServiceServicer(), server
+        RelationshipServiceImpl(), server
     )
 
     # Associa il server a un indirizzo e porta
