@@ -1,3 +1,4 @@
+import asyncio
 import grpc
 from concurrent import futures
 import time
@@ -7,10 +8,11 @@ import random
 import relationship_pb2
 import relationship_pb2_grpc
 
+
 # Classe che implementa il servizio RelationshipService
 class RelationshipServiceServicer(relationship_pb2_grpc.RelationshipServiceServicer):
 
-    def GetRelationships(self, request: relationship_pb2.RelationshipRequest, context):
+    async def GetRelationships(self, request: relationship_pb2.RelationshipRequest, context: grpc.aio.ServicerContext):
         print("request!!")
         print(request)
         """
@@ -35,13 +37,11 @@ class RelationshipServiceServicer(relationship_pb2_grpc.RelationshipServiceServi
         for rel in relationships:
             print(f"Invio relazione: {rel.label} da {rel.node_from} a {rel.node_to}")
             yield rel # Usa 'yield' per inviare ogni messaggio singolarmente in streaming
-            time.sleep(0.5) # Simula un ritardo di rete/elaborazione
 
         print(f"Streaming di relazioni completato per nodeId: {node_id}")
 
-def serve():
-    # Crea un server gRPC con un pool di thread
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+async def serve():
+    server = grpc.aio.server()
 
     # Aggiungi l'implementazione del tuo servizio al server
     relationship_pb2_grpc.add_RelationshipServiceServicer_to_server(
@@ -52,13 +52,8 @@ def serve():
     port = 9090
     server.add_insecure_port(f'[::]:{port}') # [::] ascolta su tutte le interfacce IPv6 e IPv4
     print(f"Server gRPC in ascolto sulla porta {port}")
-    server.start() # Avvia il server
-
-    try:
-        while True:
-            time.sleep(86400) # Mantieni il server in esecuzione per un giorno
-    except KeyboardInterrupt:
-        server.stop(0) # Ferma il server in caso di interruzione da tastiera
+    await server.start()
+    await server.wait_for_termination()
 
 if __name__ == '__main__':
-    serve()
+    asyncio.run(serve())

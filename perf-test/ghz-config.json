@@ -1,0 +1,25 @@
+{
+    "server": {
+        "port": 9999
+    },
+    "proto": "relationship.proto",
+    "call": "sigma_proto_sample.RelationshipService.GetRelationships",
+    "total": 2000,
+    "concurrency": 20,
+    "data": {
+        "node_id": "133btgtregertg",
+        "n_edges": 100
+    },
+    "metadata": {
+        "foo": "bar",
+        "trace_id": "{{.RequestNumber}}",
+        "timestamp": "{{.TimestampUnix}}"
+    },
+    "import-paths": [
+        "./proto"
+    ],
+    "max-duration": "10s",
+    "host": "0.0.0.0:9090",
+    "insecure": true,
+    "format": "json"
+}

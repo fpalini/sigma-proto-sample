@@ -3,3 +3,5 @@
 .idea/
 generated/
 python/*pb2*
+/data/
+/json
