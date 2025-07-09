@@ -7,8 +7,9 @@ function getMouseLayer() {
   return document.querySelector(".sigma-mouse");
 }
 
-const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: string | null) => void }>> = ({
+const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: string | null) => void, setIsLoading: (v: boolean) => void }>> = ({
   setHoveredNode,
+  setIsLoading,
   children,
 }) => {
   const sigma = useSigma();
@@ -42,6 +43,9 @@ const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: strin
         event.preventSigmaDefault();
         
         if (!graph.getNodeAttribute(node, "hidden")) {
+
+          setIsLoading(true)
+
           getRelationships(node)
             .subscribe({
               next: (relationship: Relationship) => {
@@ -72,10 +76,12 @@ const GraphEventsController: FC<PropsWithChildren<{ setHoveredNode: (node: strin
               error: (err: Error) => {
                 console.error("Errore nello stream gRPC-Web:", err);
                 console.log(`Error: ${err.message || "Unknown error"}`);
+                setIsLoading(false)
               },
               complete: () => {
                 console.log("Stream gRPC-Web completato.");
                 console.log("Stream completed.");
+                setIsLoading(false)
               },
             })
         }

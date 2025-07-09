@@ -18,9 +18,11 @@ import GraphSettingsController from "./GraphSettingsController";
 import GraphTitle from "./GraphTitle";
 import SearchField from "./SearchField";
 import TagsPanel from "./TagsPanel";
+import ProgressBar from "./ProgressBar";
 
 const Root: FC = () => {
   const graph = useMemo(() => new DirectedGraph(), []);
+  const [isLoading, setIsLoading] = useState(false);
   const [showContents, setShowContents] = useState(false);
   const [dataReady, setDataReady] = useState(false);
   const [dataset, setDataset] = useState<Dataset | null>(null);
@@ -97,13 +99,16 @@ const Root: FC = () => {
     <div id="app-root" className={showContents ? "show-contents" : ""}>
       <SigmaContainer graph={graph} settings={sigmaSettings} className="react-sigma">
         <GraphSettingsController hoveredNode={hoveredNode} />
-        <GraphEventsController setHoveredNode={setHoveredNode} />
+        <GraphEventsController setHoveredNode={setHoveredNode} setIsLoading={setIsLoading} />
         <GraphDataController filters={filtersState} />
 
         {dataReady && (
           <>
+
+              <ProgressBar isLoading={isLoading}></ProgressBar>
             <div className="controls">
               <div className="react-sigma-control ico">
+              
                 <button
                   type="button"
                   className="show-contents"

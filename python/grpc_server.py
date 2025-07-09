@@ -59,6 +59,7 @@ class RelationshipServiceImpl(RelationshipServiceServicer):
 
         for rel in relationships_source + relationships_dest:
             print(f"Invio relazione")
+            time.sleep(3)
             yield rel  # Usa 'yield' per inviare ogni messaggio singolarmente in streaming
 
         print(f"Streaming di relazioni completato per nodeId: {node_id}")
